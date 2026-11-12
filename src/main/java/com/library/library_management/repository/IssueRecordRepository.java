@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,4 +22,11 @@ public interface IssueRecordRepository extends JpaRepository<IssueRecord, Long> 
     Optional<IssueRecord> findByIdForUpdate(@Param("id") Long id);
 
     List<IssueRecord> findByReturnDateIsNullAndDueDateBefore(LocalDate date);
+
+    @Query("""
+            select issue from IssueRecord issue
+            where issue.dueDate < :date
+              and (issue.returnDate is null or issue.returnDate > issue.dueDate)
+            """)
+    List<IssueRecord> findOverdueLoans(@Param("date") LocalDate date);
 }

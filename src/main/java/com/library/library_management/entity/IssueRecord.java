@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.math.BigDecimal;
 
 @Entity
 public class IssueRecord {
@@ -27,6 +28,9 @@ public class IssueRecord {
     private LocalDate dueDate;
 
     private LocalDate returnDate;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal fineDailyRate;
 
     public IssueRecord() {
     }
@@ -77,5 +81,13 @@ public class IssueRecord {
 
     public void setReturnDate(LocalDate returnDate) {
         this.returnDate = returnDate;
+    }
+
+    public BigDecimal getFineDailyRate() {
+        return fineDailyRate;
+    }
+
+    public void setFineDailyRate(BigDecimal fineDailyRate) {
+        this.fineDailyRate = fineDailyRate;
     }
 }

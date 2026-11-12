@@ -140,6 +140,24 @@ Inactive members cannot borrow books. Email addresses are trimmed, stored in low
 
 The issue request body contains a `bookCopyId` and `memberId`. New loans get an issue date and a due date 14 days later by default. Configure `library.loan.period-days` to change this period. Responses include `dueDate` and a computed `overdue` flag; returned loans are never overdue. Loan records are history and do not have a delete endpoint.
 
+### Fines
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/fines` | List overdue loans with fines and outstanding balances |
+| GET | `/fines/{issueId}` | Get a loan's fine and payment history |
+| POST | `/fines/{issueId}/payments` | Record a payment against a loan's fine |
+
+Fines are calculated as overdue days multiplied by the daily rate. The default rate is ₹5 per day; configure `library.fine.daily-rate` to change it. Each loan captures the configured rate when it is issued. Payments must be positive and cannot exceed the current outstanding amount. The overdue day count is the number of calendar days after the due date through the return date, or through today for an active loan. Existing loans without a stored rate use the configured default.
+
+Example payment body:
+
+```json
+{
+  "amount": 10.00
+}
+```
+
 ## Business Logic
 
 Each book title can have multiple physical copies. A copy can be issued only when its status is `AVAILABLE`; issue and return operations update that copy's status. A book with borrowing history cannot be deleted.

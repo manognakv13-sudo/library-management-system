@@ -41,6 +41,7 @@ public class GlobalExceptionHandler {
             CategoryHasBooksException.class, DuplicateIsbnException.class,
             DuplicateEmailException.class,
             InactiveMemberException.class,
+            PaymentExceedsFineException.class,
             IssueRecordAlreadyReturnedException.class, InvalidLoanStateException.class,
             MemberHasLoanHistoryException.class})
     public ResponseEntity<String> handleConflict(RuntimeException ex) {
@@ -49,6 +50,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({AuthorNotFoundException.class, CategoryNotFoundException.class})
     public ResponseEntity<String> handleRelatedResourceNotFound(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(FineNotFoundException.class)
+    public ResponseEntity<String> handleFineNotFound(FineNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -31,18 +32,24 @@ public class IssueRecordService {
     private final BookCopyRepository bookCopyRepository;
     private final MemberRepository memberRepository;
     private final int loanPeriodDays;
+    private final BigDecimal fineDailyRate;
 
     public IssueRecordService(IssueRecordRepository issueRecordRepository,
                               BookCopyRepository bookCopyRepository,
                               MemberRepository memberRepository,
-                              @Value("${library.loan.period-days:14}") int loanPeriodDays) {
+                              @Value("${library.loan.period-days:14}") int loanPeriodDays,
+                              @Value("${library.fine.daily-rate:5.00}") BigDecimal fineDailyRate) {
         this.issueRecordRepository = issueRecordRepository;
         this.bookCopyRepository = bookCopyRepository;
         this.memberRepository = memberRepository;
         if (loanPeriodDays < 1) {
             throw new IllegalArgumentException("Loan period must be at least one day");
         }
+        if (fineDailyRate == null || fineDailyRate.signum() <= 0) {
+            throw new IllegalArgumentException("Fine daily rate must be greater than zero");
+        }
         this.loanPeriodDays = loanPeriodDays;
+        this.fineDailyRate = fineDailyRate.setScale(2, java.math.RoundingMode.HALF_UP);
     }
 
     @Transactional
@@ -65,6 +72,7 @@ public class IssueRecordService {
         LocalDate issueDate = LocalDate.now();
         issue.setIssueDate(issueDate);
         issue.setDueDate(issueDate.plusDays(loanPeriodDays));
+        issue.setFineDailyRate(fineDailyRate);
         return toDto(issueRecordRepository.save(issue));
     }
 
