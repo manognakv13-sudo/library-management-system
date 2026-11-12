@@ -19,6 +19,7 @@ import com.library.library_management.repository.IssueRecordRepository;
 import com.library.library_management.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,13 +30,19 @@ public class IssueRecordService {
     private final IssueRecordRepository issueRecordRepository;
     private final BookCopyRepository bookCopyRepository;
     private final MemberRepository memberRepository;
+    private final int loanPeriodDays;
 
     public IssueRecordService(IssueRecordRepository issueRecordRepository,
                               BookCopyRepository bookCopyRepository,
-                              MemberRepository memberRepository) {
+                              MemberRepository memberRepository,
+                              @Value("${library.loan.period-days:14}") int loanPeriodDays) {
         this.issueRecordRepository = issueRecordRepository;
         this.bookCopyRepository = bookCopyRepository;
         this.memberRepository = memberRepository;
+        if (loanPeriodDays < 1) {
+            throw new IllegalArgumentException("Loan period must be at least one day");
+        }
+        this.loanPeriodDays = loanPeriodDays;
     }
 
     @Transactional
@@ -55,7 +62,9 @@ public class IssueRecordService {
         IssueRecord issue = new IssueRecord();
         issue.setBookCopy(copy);
         issue.setMember(member);
-        issue.setIssueDate(LocalDate.now());
+        LocalDate issueDate = LocalDate.now();
+        issue.setIssueDate(issueDate);
+        issue.setDueDate(issueDate.plusDays(loanPeriodDays));
         return toDto(issueRecordRepository.save(issue));
     }
 
@@ -81,6 +90,14 @@ public class IssueRecordService {
     }
 
     @Transactional(readOnly = true)
+    public List<IssueResponseDto> getOverdueIssueRecords() {
+        return issueRecordRepository.findByReturnDateIsNullAndDueDateBefore(LocalDate.now())
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public IssueResponseDto getIssueRecordById(Long id) {
         IssueRecord issue = issueRecordRepository.findById(id)
                 .orElseThrow(() -> new IssueRecordNotFoundException("Issue record not found"));
@@ -97,7 +114,11 @@ public class IssueRecordService {
                 issue.getMember().getId(),
                 issue.getMember().getName(),
                 issue.getIssueDate(),
-                issue.getReturnDate()
+                issue.getDueDate(),
+                issue.getReturnDate(),
+                issue.getReturnDate() == null
+                        && issue.getDueDate() != null
+                        && issue.getDueDate().isBefore(LocalDate.now())
         );
     }
 }

@@ -24,6 +24,8 @@ public class IssueRecord {
 
     private LocalDate issueDate;
 
+    private LocalDate dueDate;
+
     private LocalDate returnDate;
 
     public IssueRecord() {
@@ -63,6 +65,14 @@ public class IssueRecord {
 
     public LocalDate getReturnDate() {
         return returnDate;
+    }
+
+    public LocalDate getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
     }
 
     public void setReturnDate(LocalDate returnDate) {

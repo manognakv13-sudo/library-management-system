@@ -12,11 +12,13 @@ public class IssueResponseDto {
     private String memberName;
 
     private LocalDate issueDate;
+    private LocalDate dueDate;
     private LocalDate returnDate;
+    private boolean overdue;
 
     public IssueResponseDto(Long issueId, Long bookId, Long bookCopyId, String bookTitle,
                             Long memberId, String memberName, LocalDate issueDate,
-                            LocalDate returnDate) {
+                            LocalDate dueDate, LocalDate returnDate, boolean overdue) {
         this.issueId = issueId;
         this.bookId = bookId;
         this.bookCopyId = bookCopyId;
@@ -24,7 +26,9 @@ public class IssueResponseDto {
         this.memberId = memberId;
         this.memberName = memberName;
         this.issueDate = issueDate;
+        this.dueDate = dueDate;
         this.returnDate = returnDate;
+        this.overdue = overdue;
     }
 
     public Long getIssueId() {
@@ -81,6 +85,18 @@ public class IssueResponseDto {
 
     public LocalDate getReturnDate() {
         return returnDate;
+    }
+
+    public LocalDate getDueDate() {
+        return dueDate;
+    }
+
+    public boolean isOverdue() {
+        return overdue;
+    }
+
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
     }
 
     public void setReturnDate(LocalDate returnDate) {

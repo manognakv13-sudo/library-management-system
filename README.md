@@ -134,10 +134,11 @@ Inactive members cannot borrow books. Email addresses are trimmed, stored in low
 |---|---|---|
 | POST | `/issues` | Issue a book |
 | GET | `/issues` | Get all issue records |
+| GET | `/issues/overdue` | Get active loans past their due date |
 | GET | `/issues/{id}` | Get issue by ID |
 | POST | `/issues/{id}/return` | Return a book |
 
-The issue request body contains a `bookCopyId` and `memberId`. Loan records are history and do not have a delete endpoint.
+The issue request body contains a `bookCopyId` and `memberId`. New loans get an issue date and a due date 14 days later by default. Configure `library.loan.period-days` to change this period. Responses include `dueDate` and a computed `overdue` flag; returned loans are never overdue. Loan records are history and do not have a delete endpoint.
 
 ## Business Logic
 

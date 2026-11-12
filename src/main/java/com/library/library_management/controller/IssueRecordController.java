@@ -33,6 +33,11 @@ public class IssueRecordController {
         return issueRecordService.getAllIssueRecords();
     }
 
+    @GetMapping("/overdue")
+    public List<IssueResponseDto> getOverdueIssueRecords() {
+        return issueRecordService.getOverdueIssueRecords();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<IssueResponseDto> getIssueRecordById(@PathVariable Long id) {
         return ResponseEntity.ok(issueRecordService.getIssueRecordById(id));

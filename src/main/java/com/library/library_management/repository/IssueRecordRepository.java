@@ -7,6 +7,10 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 public interface IssueRecordRepository extends JpaRepository<IssueRecord, Long> {
     boolean existsByBookCopy_Book_Id(Long bookId);
 
@@ -14,5 +18,7 @@ public interface IssueRecordRepository extends JpaRepository<IssueRecord, Long> 
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select issue from IssueRecord issue where issue.id = :id")
-    java.util.Optional<IssueRecord> findByIdForUpdate(@Param("id") Long id);
+    Optional<IssueRecord> findByIdForUpdate(@Param("id") Long id);
+
+    List<IssueRecord> findByReturnDateIsNullAndDueDateBefore(LocalDate date);
 }
