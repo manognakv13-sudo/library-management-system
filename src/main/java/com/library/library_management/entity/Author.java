@@ -39,4 +39,12 @@ public class Author {
     public String getBiography() {
         return biography;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setBiography(String biography) {
+        this.biography = biography;
+    }
 }

@@ -1,16 +1,20 @@
 package com.library.library_management.dto;
 
+import com.library.library_management.entity.MemberStatus;
+
 public class MemberResponseDto {
     private Long id;
     private String name;
     private String email;
     private String phone;
+    private MemberStatus status;
 
-    public MemberResponseDto(Long id, String name, String email, String phone) {
+    public MemberResponseDto(Long id, String name, String email, String phone, MemberStatus status) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.phone = phone;
+        this.status = status;
     }
 
     public Long getId() {
@@ -43,5 +47,13 @@ public class MemberResponseDto {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public MemberStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(MemberStatus status) {
+        this.status = status;
     }
 }

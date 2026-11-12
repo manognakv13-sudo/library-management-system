@@ -37,7 +37,10 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler({BookHasLoanHistoryException.class, DuplicateIsbnException.class,
+    @ExceptionHandler({AuthorHasBooksException.class, BookHasLoanHistoryException.class,
+            CategoryHasBooksException.class, DuplicateIsbnException.class,
+            DuplicateEmailException.class,
+            InactiveMemberException.class,
             IssueRecordAlreadyReturnedException.class, InvalidLoanStateException.class,
             MemberHasLoanHistoryException.class})
     public ResponseEntity<String> handleConflict(RuntimeException ex) {

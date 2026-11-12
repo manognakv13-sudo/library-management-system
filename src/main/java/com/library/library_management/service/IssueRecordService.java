@@ -6,10 +6,12 @@ import com.library.library_management.entity.BookCopy;
 import com.library.library_management.entity.BookCopyStatus;
 import com.library.library_management.entity.IssueRecord;
 import com.library.library_management.entity.Member;
+import com.library.library_management.entity.MemberStatus;
 import com.library.library_management.exception.BookAlreadyIssuedException;
 import com.library.library_management.exception.BookNotFoundException;
 import com.library.library_management.exception.IssueRecordAlreadyReturnedException;
 import com.library.library_management.exception.IssueRecordNotFoundException;
+import com.library.library_management.exception.InactiveMemberException;
 import com.library.library_management.exception.InvalidLoanStateException;
 import com.library.library_management.exception.MemberNotFoundException;
 import com.library.library_management.repository.BookCopyRepository;
@@ -42,6 +44,9 @@ public class IssueRecordService {
                 .orElseThrow(() -> new BookNotFoundException("Book copy not found"));
         Member member = memberRepository.findById(request.getMemberId())
                 .orElseThrow(() -> new MemberNotFoundException("Member not found"));
+        if (member.getStatus() != MemberStatus.ACTIVE) {
+            throw new InactiveMemberException("Inactive members cannot borrow books");
+        }
         if (copy.getStatus() != BookCopyStatus.AVAILABLE) {
             throw new BookAlreadyIssuedException("Book copy is not available");
         }

@@ -54,6 +54,9 @@ Handles application errors and validation errors.
 - Add a member
 - Get all members
 - Get member by ID
+- Update member contact details
+- Activate or deactivate a member account
+- Prevent duplicate email addresses
 - Validate member information
 
 ### Issue Management
@@ -103,16 +106,27 @@ The application provides meaningful errors for:
 |---|---|---|
 | POST | `/authors` | Create an author |
 | GET | `/authors` | List authors |
+| GET | `/authors/{id}` | Get an author |
+| PUT | `/authors/{id}` | Update an author |
+| DELETE | `/authors/{id}` | Delete an author not linked to books |
 | POST | `/categories` | Create a category |
 | GET | `/categories` | List categories |
+| GET | `/categories/{id}` | Get a category |
+| PUT | `/categories/{id}` | Update a category |
+| DELETE | `/categories/{id}` | Delete a category not linked to books |
 
 ### Members
 
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | `/members` | Add a member |
+| POST | `/members` | Register a member (starts as `ACTIVE`) |
 | GET | `/members` | Get all members |
 | GET | `/members/{id}` | Get member by ID |
+| PUT | `/members/{id}` | Update name, email, and phone |
+| PATCH | `/members/{id}/status` | Change status to `ACTIVE` or `INACTIVE` |
+| DELETE | `/members/{id}` | Delete a member without loan history |
+
+Inactive members cannot borrow books. Email addresses are trimmed, stored in lowercase, and must be unique.
 
 ### Issues
 

@@ -4,11 +4,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 @Entity
+@Table(name = "members")
 public class Member {
 
 
@@ -21,6 +26,7 @@ public class Member {
 
     @NotBlank(message = "Email is required")
     @Email(message = "Enter a valid Email")
+    @Column(nullable = false, unique = true)
     private String email;
 
     @NotBlank(message = "Phone is required")
@@ -29,6 +35,10 @@ public class Member {
             message = "Phone Number must contain exactly 10 digits"
     )
     private String phone;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MemberStatus status = MemberStatus.ACTIVE;
 
     public Member() {
     }
@@ -63,5 +73,13 @@ public class Member {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public MemberStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(MemberStatus status) {
+        this.status = status;
     }
 }
