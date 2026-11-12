@@ -5,6 +5,7 @@ import java.time.LocalDate;
 public class IssueResponseDto {
     private Long issueId;
     private Long bookId;
+    private Long bookCopyId;
     private String bookTitle;
 
     private Long memberId;
@@ -13,9 +14,12 @@ public class IssueResponseDto {
     private LocalDate issueDate;
     private LocalDate returnDate;
 
-    public IssueResponseDto(Long issueId, Long bookId, String bookTitle, Long memberId, String memberName, LocalDate issueDate, LocalDate returnDate) {
+    public IssueResponseDto(Long issueId, Long bookId, Long bookCopyId, String bookTitle,
+                            Long memberId, String memberName, LocalDate issueDate,
+                            LocalDate returnDate) {
         this.issueId = issueId;
         this.bookId = bookId;
+        this.bookCopyId = bookCopyId;
         this.bookTitle = bookTitle;
         this.memberId = memberId;
         this.memberName = memberName;
@@ -33,6 +37,10 @@ public class IssueResponseDto {
 
     public Long getBookId() {
         return bookId;
+    }
+
+    public Long getBookCopyId() {
+        return bookCopyId;
     }
 
     public void setBookId(Long bookId) {

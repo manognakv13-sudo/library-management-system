@@ -1,8 +1,6 @@
 package com.library.library_management.entity;
 
 import jakarta.persistence.*;
-import com.library.library_management.entity.Book;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
@@ -14,12 +12,14 @@ public class IssueRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Book is required")
-    @ManyToOne
-    private Book book;
+    @NotNull(message = "Book copy is required")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "book_copy_id", nullable = false)
+    private BookCopy bookCopy;
 
     @NotNull(message = "Member is required")
-    @ManyToOne
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     private LocalDate issueDate;
@@ -37,12 +37,12 @@ public class IssueRecord {
         this.id = id;
     }
 
-    public Book getBook() {
-        return book;
+    public BookCopy getBookCopy() {
+        return bookCopy;
     }
 
-    public void setBook(Book book) {
-        this.book = book;
+    public void setBookCopy(BookCopy bookCopy) {
+        this.bookCopy = bookCopy;
     }
 
     public Member getMember() {

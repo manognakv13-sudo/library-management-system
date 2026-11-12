@@ -42,9 +42,11 @@ Handles application errors and validation errors.
 ### Book Management
 
 - Add a book
+- Update book details
 - Get all books
 - Get book by ID
-- Track book availability
+- Search and filter books with pagination and sorting
+- Track total and available physical copies
 - Prevent issuing an unavailable book
 
 ### Member Management
@@ -88,9 +90,21 @@ The application provides meaningful errors for:
 
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | `/books` | Add a book |
-| GET | `/books` | Get all books |
+| POST | `/books` | Add a title and physical copies |
+| GET | `/books` | Search books; supports `title`, `isbn`, `authorId`, `categoryId`, `page`, `size`, and `sort` |
 | GET | `/books/{id}` | Get book by ID |
+| GET | `/books/{id}/copies` | List physical copies and statuses |
+| PUT | `/books/{id}` | Update title, ISBN, author, or category |
+| DELETE | `/books/{id}` | Delete a book with no loan history |
+
+### Authors and categories
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/authors` | Create an author |
+| GET | `/authors` | List authors |
+| POST | `/categories` | Create a category |
+| GET | `/categories` | List categories |
 
 ### Members
 
@@ -109,23 +123,50 @@ The application provides meaningful errors for:
 | GET | `/issues/{id}` | Get issue by ID |
 | POST | `/issues/{id}/return` | Return a book |
 
+The issue request body contains a `bookCopyId` and `memberId`. Loan records are history and do not have a delete endpoint.
+
 ## Business Logic
 
-When a book is issued:
+Each book title can have multiple physical copies. A copy can be issued only when its status is `AVAILABLE`; issue and return operations update that copy's status. A book with borrowing history cannot be deleted.
 
-Book availability changes:
+### Book API examples
 
-`true → false`
+Create a book and two physical copies with `POST /books`:
 
-When the book is returned:
+```json
+{
+  "title": "Pride and Prejudice",
+  "isbn": "9780141439518",
+  "authorId": 1,
+  "categoryId": 1,
+  "copies": 2
+}
+```
 
-`false → true`
+Update book metadata using `PUT /books/{id}`. Existing copies and their statuses are preserved:
 
-A book that is already issued cannot be issued again.
+```json
+{
+  "title": "Pride and Prejudice",
+  "isbn": "9780141439518",
+  "authorId": 1,
+  "categoryId": 1
+}
+```
+
+Search and page through books:
+
+```text
+GET /books?title=pride&categoryId=1&page=0&size=20&sort=title,asc
+```
+
+The `GET /books` response is a Spring `Page` JSON object with `content`, `totalElements`, `totalPages`, `size`, and `number`. Title and ISBN searches are case-insensitive partial matches; author and category filters match IDs exactly.
 
 ## Database
 
 The application uses MySQL as the database and Hibernate/JPA for database interaction.
+
+`Book` stores title and ISBN metadata, while each `BookCopy` tracks one physical item. Every book has one author and one category; each loan refers to one copy and one member.
 
 ## Testing
 

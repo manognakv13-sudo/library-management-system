@@ -1,13 +1,13 @@
 package com.library.library_management.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import org.apache.catalina.webresources.StandardRoot;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
+@Table(name = "books")
 public class Book {
 
 
@@ -16,15 +16,23 @@ public class Book {
     private Long id;
 
     @NotBlank(message = "Title is required")
+    @Column(nullable = false)
     private String title;
 
-    @NotBlank(message = "Author is required")
-    private String author;
-
     @NotBlank(message = "ISBN is required")
+    @Column(nullable = false, unique = true)
     private String isbn;
 
-    private boolean available;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "author_id", nullable = false)
+    private Author author;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookCopy> copies = new ArrayList<>();
 
     public Book() {
     }
@@ -45,12 +53,20 @@ public class Book {
         this.title = title;
     }
 
-    public String getAuthor() {
+    public Author getAuthor() {
         return author;
     }
 
-    public void setAuthor(String author) {
+    public void setAuthor(Author author) {
         this.author = author;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public String getIsbn() {
@@ -61,14 +77,7 @@ public class Book {
         this.isbn = isbn;
     }
 
-    public boolean isAvailable() {
-        return available;
+    public List<BookCopy> getCopies() {
+        return copies;
     }
-
-    public void setAvailable(boolean available) {
-        this.available = available;
-    }
-
-
-
 }

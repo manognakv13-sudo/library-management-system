@@ -3,17 +3,27 @@ package com.library.library_management.dto;
 public class BookResponseDto {
     private Long id;
     private String title;
-    private String author;
+    private Long authorId;
+    private String authorName;
+    private Long categoryId;
+    private String categoryName;
     private String isbn;
-    private boolean available;
+    private int totalCopies;
+    private int availableCopies;
 
 
-    public BookResponseDto(Long id, String title, String author, String isbn, boolean available) {
+    public BookResponseDto(Long id, String title, Long authorId, String authorName,
+                           Long categoryId, String categoryName, String isbn,
+                           int totalCopies, int availableCopies) {
         this.id = id;
         this.title = title;
-        this.author = author;
+        this.authorId = authorId;
+        this.authorName = authorName;
+        this.categoryId = categoryId;
+        this.categoryName = categoryName;
         this.isbn = isbn;
-        this.available = available;
+        this.totalCopies = totalCopies;
+        this.availableCopies = availableCopies;
     }
 
     public Long getId() {
@@ -32,12 +42,20 @@ public class BookResponseDto {
         this.title = title;
     }
 
-    public String getAuthor() {
-        return author;
+    public Long getAuthorId() {
+        return authorId;
     }
 
-    public void setAuthor(String author) {
-        this.author = author;
+    public String getAuthorName() {
+        return authorName;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
     }
 
     public String getIsbn() {
@@ -48,11 +66,11 @@ public class BookResponseDto {
         this.isbn = isbn;
     }
 
-    public boolean isAvailable() {
-        return available;
+    public int getTotalCopies() {
+        return totalCopies;
     }
 
-    public void setAvailable(boolean available) {
-        this.available = available;
+    public int getAvailableCopies() {
+        return availableCopies;
     }
 }

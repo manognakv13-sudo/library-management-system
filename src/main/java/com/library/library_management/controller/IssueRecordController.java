@@ -2,9 +2,10 @@ package com.library.library_management.controller;
 
 
 import com.library.library_management.dto.IssueResponseDto;
-import com.library.library_management.entity.IssueRecord;
+import com.library.library_management.dto.IssueCreateRequestDto;
 import com.library.library_management.service.IssueRecordService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,8 +23,9 @@ public class IssueRecordController {
     }
 
     @PostMapping
-    public IssueResponseDto issueBook(@Valid  @RequestBody IssueRecord issueRecord) {
-        return issueRecordService.issueBook(issueRecord);
+    @ResponseStatus(HttpStatus.CREATED)
+    public IssueResponseDto issueBook(@Valid @RequestBody IssueCreateRequestDto request) {
+        return issueRecordService.issueBook(request);
     }
 
     @GetMapping
@@ -41,8 +43,4 @@ public class IssueRecordController {
         return issueRecordService.returnBook(id);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteIssueRecord(@PathVariable Long id) {
-        issueRecordService.deleteIssueRecord(id);
-    }
 }

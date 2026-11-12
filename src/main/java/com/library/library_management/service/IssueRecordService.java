@@ -1,108 +1,98 @@
 package com.library.library_management.service;
 
+import com.library.library_management.dto.IssueCreateRequestDto;
 import com.library.library_management.dto.IssueResponseDto;
-import com.library.library_management.entity.Book;
+import com.library.library_management.entity.BookCopy;
+import com.library.library_management.entity.BookCopyStatus;
 import com.library.library_management.entity.IssueRecord;
 import com.library.library_management.entity.Member;
 import com.library.library_management.exception.BookAlreadyIssuedException;
 import com.library.library_management.exception.BookNotFoundException;
+import com.library.library_management.exception.IssueRecordAlreadyReturnedException;
 import com.library.library_management.exception.IssueRecordNotFoundException;
+import com.library.library_management.exception.InvalidLoanStateException;
 import com.library.library_management.exception.MemberNotFoundException;
-import com.library.library_management.repository.BookRepository;
+import com.library.library_management.repository.BookCopyRepository;
 import com.library.library_management.repository.IssueRecordRepository;
 import com.library.library_management.repository.MemberRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class IssueRecordService {
 
     private final IssueRecordRepository issueRecordRepository;
-    private final BookRepository bookRepository;
+    private final BookCopyRepository bookCopyRepository;
     private final MemberRepository memberRepository;
 
-    public IssueRecordService(
-            IssueRecordRepository issueRecordRepository,
-            BookRepository bookRepository,
-            MemberRepository memberRepository) {
-
+    public IssueRecordService(IssueRecordRepository issueRecordRepository,
+                              BookCopyRepository bookCopyRepository,
+                              MemberRepository memberRepository) {
         this.issueRecordRepository = issueRecordRepository;
-        this.bookRepository = bookRepository;
+        this.bookCopyRepository = bookCopyRepository;
         this.memberRepository = memberRepository;
     }
 
-    public IssueResponseDto issueBook(IssueRecord issueRecord) {
-
-        Long bookId = issueRecord.getBook().getId();
-        Long memberId = issueRecord.getMember().getId();
-
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new BookNotFoundException("Book not found"));
-
-         Member member = memberRepository.findById(memberId)
+    @Transactional
+    public IssueResponseDto issueBook(IssueCreateRequestDto request) {
+        BookCopy copy = bookCopyRepository.findByIdForUpdate(request.getBookCopyId())
+                .orElseThrow(() -> new BookNotFoundException("Book copy not found"));
+        Member member = memberRepository.findById(request.getMemberId())
                 .orElseThrow(() -> new MemberNotFoundException("Member not found"));
-
-        if (!book.isAvailable()) {
-            throw new BookAlreadyIssuedException("Book is already issued");
+        if (copy.getStatus() != BookCopyStatus.AVAILABLE) {
+            throw new BookAlreadyIssuedException("Book copy is not available");
         }
 
-        book.setAvailable(false);
-        bookRepository.save(book);
-
-        issueRecord.setBook(book);
-        issueRecord.setMember(member);
-
-        IssueRecord savedIssue = issueRecordRepository.save(issueRecord);
-        return convertToDTO(savedIssue);
+        copy.setStatus(BookCopyStatus.ISSUED);
+        IssueRecord issue = new IssueRecord();
+        issue.setBookCopy(copy);
+        issue.setMember(member);
+        issue.setIssueDate(LocalDate.now());
+        return toDto(issueRecordRepository.save(issue));
     }
 
+    @Transactional
     public IssueResponseDto returnBook(Long issueId) {
-
-        IssueRecord issueRecord = issueRecordRepository.findById(issueId)
+        IssueRecord issue = issueRecordRepository.findByIdForUpdate(issueId)
                 .orElseThrow(() -> new IssueRecordNotFoundException("Issue record not found"));
-
-        Book book = issueRecord.getBook();
-
-        book.setAvailable(true);
-        bookRepository.save(book);
-
-        issueRecord.setReturnDate(LocalDate.now());
-
-        IssueRecord savedIssue = issueRecordRepository.save(issueRecord);
-        return convertToDTO(savedIssue);
+        if (issue.getReturnDate() != null) {
+            throw new IssueRecordAlreadyReturnedException("This loan has already been returned");
+        }
+        BookCopy copy = issue.getBookCopy();
+        if (copy.getStatus() != BookCopyStatus.ISSUED) {
+            throw new InvalidLoanStateException("The copy is not marked as issued for this loan");
+        }
+        copy.setStatus(BookCopyStatus.AVAILABLE);
+        issue.setReturnDate(LocalDate.now());
+        return toDto(issue);
     }
 
+    @Transactional(readOnly = true)
     public List<IssueResponseDto> getAllIssueRecords() {
-
-        return issueRecordRepository.findAll()
-                .stream()
-                .map(this::convertToDTO)
-                .toList();
+        return issueRecordRepository.findAll().stream().map(this::toDto).toList();
     }
 
+    @Transactional(readOnly = true)
     public IssueResponseDto getIssueRecordById(Long id) {
-        IssueRecord issueRecord = issueRecordRepository.findById(id)
-                .orElseThrow(() -> new IssueRecordNotFoundException("Issued Record Not Found"));
-        return convertToDTO(issueRecord);
+        IssueRecord issue = issueRecordRepository.findById(id)
+                .orElseThrow(() -> new IssueRecordNotFoundException("Issue record not found"));
+        return toDto(issue);
     }
 
-    public void deleteIssueRecord(Long id) {
-        issueRecordRepository.deleteById(id);
-    }
-
-
-    private IssueResponseDto convertToDTO(IssueRecord issueRecord){
+    private IssueResponseDto toDto(IssueRecord issue) {
+        BookCopy copy = issue.getBookCopy();
         return new IssueResponseDto(
-                issueRecord.getId(),
-                issueRecord.getBook().getId(),
-                issueRecord.getBook().getTitle(),
-                issueRecord.getMember().getId(),
-                issueRecord.getMember().getName(),
-                issueRecord.getIssueDate(),
-                issueRecord.getReturnDate()
+                issue.getId(),
+                copy.getBook().getId(),
+                copy.getId(),
+                copy.getBook().getTitle(),
+                issue.getMember().getId(),
+                issue.getMember().getName(),
+                issue.getIssueDate(),
+                issue.getReturnDate()
         );
     }
 }
